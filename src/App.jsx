@@ -90,18 +90,34 @@ function App() {
   }
 
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      playMusic()
-      window.removeEventListener('pointerdown', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
+    const audio = audioRef.current
+    if (!audio) return undefined
+
+    const startMusic = () => {
+      void playMusic()
+      window.removeEventListener('pointerdown', startMusic, true)
+      window.removeEventListener('touchstart', startMusic, true)
+      window.removeEventListener('click', startMusic, true)
+      window.removeEventListener('keydown', startMusic, true)
     }
 
-    window.addEventListener('pointerdown', handleFirstInteraction)
-    window.addEventListener('keydown', handleFirstInteraction)
+    const retryWhenReady = () => {
+      void playMusic()
+    }
+
+    audio.addEventListener('canplay', retryWhenReady)
+    window.addEventListener('pointerdown', startMusic, true)
+    window.addEventListener('touchstart', startMusic, { capture: true, passive: true })
+    window.addEventListener('click', startMusic, true)
+    window.addEventListener('keydown', startMusic, true)
+    void playMusic()
 
     return () => {
-      window.removeEventListener('pointerdown', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
+      audio.removeEventListener('canplay', retryWhenReady)
+      window.removeEventListener('pointerdown', startMusic, true)
+      window.removeEventListener('touchstart', startMusic, true)
+      window.removeEventListener('click', startMusic, true)
+      window.removeEventListener('keydown', startMusic, true)
     }
   }, [])
 

@@ -20,8 +20,8 @@ export const weddingData = {
     { name: 'Mata ka Jagrata', tradition: 'An evening of devotion', date: 'Date to be announced', day: 'Day to be announced', time: 'Time to be announced' },
   ].map((event) => ({ ...event, venue: 'Ujjain', address: 'Ujjain, Madhya Pradesh, India', mapsUrl: 'https://maps.google.com/?q=Ujjain%2C+Madhya+Pradesh%2C+India' })),
   gallery: [
-    ['/gallery/ring.jpeg', 'Sunny Narula and Shiwangi Khanduja together', 'Our moments', 'large'],
-    ['/gallery/TigerP.jpg', 'Wedding ceremony details', 'Wedding memories', 'standard'],
+    ['/gallery/ring.jpeg', 'Sunny Narula and Shiwangi Khanduja together', 'Our moments', 'standard'],
+    ['/gallery/TigerP.jpg', 'Wedding ceremony details', 'Wedding memories', 'tall'],
     ['/gallery/m.jpeg', 'Bride in traditional attire', 'Our moments', 'standard'],
     ['/gallery/br.JPG', 'Wedding flowers', 'Family and friends', 'tall'],
     ['/gallery/Tigerp1.JPG', 'Indian wedding celebration', 'Wedding memories', 'tall'],
