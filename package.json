@@ -1,0 +1,10 @@
+{
+  "name": "wedding-app-worktree",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix default-login-route-for-admins run dev",
+    "build": "npm --prefix default-login-route-for-admins run build",
+    "lint": "npm --prefix default-login-route-for-admins run lint",
+    "preview": "npm --prefix default-login-route-for-admins run preview"
+  }
+}
