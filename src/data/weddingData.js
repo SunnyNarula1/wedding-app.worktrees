@@ -7,7 +7,7 @@ export const weddingData = {
   familyMessage: 'With the blessings of our parents and families, we request your gracious presence and blessings as we begin this beautiful journey together.',
   weddingDate: '2026-12-11T21:00:00+05:30',
   venue: { name: 'Ujjain', address: 'Ujjain, Madhya Pradesh, India', mapsUrl: 'https://maps.google.com/?q=Ujjain%2C+Madhya+Pradesh%2C+India' },
-  musicUrl: '',
+  musicUrl: '/gallery/Sun.mp3',
   heroImage: { src: '/gallery/both.JPG', alt: 'Sunny Narula and Shiwangi Khanduja together' },
   events: [
     { name: 'Jaggo', tradition: 'Punjabi Fun Night', date: 'Date to be announced', day: 'Day to be announced', time: 'Time to be announced' },

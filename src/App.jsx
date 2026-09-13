@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { ArrowDown, ArrowUpRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Copy, ExternalLink, Heart, MapPin, Menu, Send, Share2, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowDown, ArrowUpRight, CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Copy, ExternalLink, Heart, MapPin, Menu, Pause, Play, Send, Share2, X } from 'lucide-react'
 import { weddingData as data } from './data/weddingData'
 import './App.css'
 import './header-blessing.css'
@@ -18,8 +18,18 @@ function Events() { return <section className="section" id="events"><Heading eye
 function Gallery() { const [active, setActive] = useState(null); const move = (step) => setActive((active + step + data.gallery.length) % data.gallery.length); return <section className="section" id="gallery"><Heading eyebrow="A glimpse of us" title="Frames of forever" text="A few little memories from the journey so far." /><div className="gallery">{data.gallery.map((image, i) => <button className={image.size} key={image.src} onClick={() => setActive(i)}><img src={image.src} alt={image.alt} loading="lazy" /><span>{image.category}</span></button>)}</div>{active !== null && <div className="lightbox"><button onClick={() => setActive(null)} aria-label="Close"><X /></button><button className="prev" onClick={() => move(-1)} aria-label="Previous"><ChevronLeft /></button><img src={data.gallery[active].src} alt={data.gallery[active].alt} /><button className="next" onClick={() => move(1)} aria-label="Next"><ChevronRight /></button></div>}</section> }
 function Share({ onInvitationSent }) { const [copied, setCopied] = useState(false); const text = "You're invited to Sunny Narula & Shiwangi Khanduja wedding celebration."; const invitationUrl = (() => { const url = new URL(window.location.href); url.searchParams.set('view', 'guest'); url.hash = 'top'; return url.toString() })(); const copy = async () => { await navigator.clipboard?.writeText(invitationUrl); setCopied(true); setTimeout(() => setCopied(false), 1800); onInvitationSent() }; const share = async () => navigator.share ? navigator.share({ title: 'Sunny Narula & ShiwangiKhanduja | Wedding Invitation', text, url: invitationUrl }).then(onInvitationSent) : copy(); return <section className="share" id="share"><div><span className="eyebrow light">Pass it on</span><h2>Bring your favourite people.</h2><p>Send the invitation to family and friends.</p></div><div className="share-buttons"><a href={`https://wa.me/?text=${encodeURIComponent(text + ' ' + invitationUrl)}`} target="_blank" rel="noreferrer" onClick={onInvitationSent}><Send size={17} /> Share on WhatsApp</a><button onClick={copy}>{copied ? <Check size={17} /> : <Copy size={17} />}{copied ? 'Link copied' : 'Copy invitation link'}</button><button onClick={share}><Share2 size={17} /> Share invitation</button></div></section> }
 function App() {
+  const audioRef = useRef(null)
   const [sent, setSent] = useState(false)
   const [name, setName] = useState('')
+  const [musicOn, setMusicOn] = useState(false)
+  const [guestForm, setGuestForm] = useState({
+    name: '',
+    guests: '1',
+    response: 'Joyfully attending',
+    message: '',
+  })
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [login, setLogin] = useState({ username: '', password: '' })
   const [loginError, setLoginError] = useState('')
   const [loginOpen, setLoginOpen] = useState(() => {
@@ -33,6 +43,8 @@ function App() {
     return localStorage.getItem(AUTH_ROLE_KEY) || 'guest'
   })
 
+  const sheetEndpoint = import.meta.env.VITE_GOOGLE_SHEET_WEB_APP_URL || ''
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(AUTH_ROLE_KEY, role)
@@ -45,15 +57,53 @@ function App() {
     }
   }, [role])
 
+  const canShareInvitation = AUTHORIZED_SHARE_ROLES.has(role)
+
+  const playMusic = async () => {
+    if (!data.musicUrl) return
+
+    const audio = audioRef.current
+    if (!audio) return
+
+    try {
+      audio.volume = 0.5
+      await audio.play()
+      setMusicOn(true)
+    } catch (error) {
+      setMusicOn(false)
+    }
+  }
+
+  const toggleMusic = async () => {
+    if (!data.musicUrl) return
+
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (musicOn) {
+      audio.pause()
+      setMusicOn(false)
+      return
+    }
+
+    await playMusic()
+  }
+
   useEffect(() => {
-    const heroImage = document.querySelector('.hero-photo img')
-    if (heroImage) {
-      heroImage.src = data.heroImage.src
-      heroImage.alt = data.heroImage.alt
+    const handleFirstInteraction = () => {
+      playMusic()
+      window.removeEventListener('pointerdown', handleFirstInteraction)
+      window.removeEventListener('keydown', handleFirstInteraction)
+    }
+
+    window.addEventListener('pointerdown', handleFirstInteraction)
+    window.addEventListener('keydown', handleFirstInteraction)
+
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstInteraction)
+      window.removeEventListener('keydown', handleFirstInteraction)
     }
   }, [])
-
-  const canShareInvitation = AUTHORIZED_SHARE_ROLES.has(role)
 
   const handleInvitationSent = () => {
     setRole('guest')
@@ -86,5 +136,47 @@ function App() {
     }
   }
 
-  return <div id="top"><Header canShareInvitation={canShareInvitation} /><main><section className="hero"><div className="hero-copy"><span className="eyebrow">{data.invitationLabel}</span><h1>Sunny <i>&</i><br />Shiwangi</h1><p>{data.description}</p><a href="#events">Explore the invitation <ArrowDown size={16} /></a></div><div className="hero-photo"><img src={data.gallery[5].src} alt="Sunny Narula and Shiwangi Khanduja" /><span>with love<br /><b>2026</b></span></div></section><section className="section couple"><div className="couple-photo"><img src={data.gallery[2].src} alt="Bride in traditional attire" /><strong>Sunny <i>&</i> Shiwangi</strong></div><div><span className="eyebrow">The couple</span><h2>Made for<br /><em>each other.</em></h2><p>{data.intro}</p><div className="signature">S <span>&</span> S</div></div></section><Countdown /><Events /><section className="section story" id="story"><Heading eyebrow="Our story" title="And so it begins" text="The sweetest chapters are the ones we write together." /><div>{data.story.map((item, i) => <article key={item.title}><b>0{i + 1}</b><div><span className="eyebrow">{item.year}</span><h3>{item.title}</h3><p>{item.text}</p></div></article>)}</div></section><Gallery /><section className="family"><Heart size={20} fill="currentColor" /><p>{data.familyMessage}</p><span className="eyebrow light">With love, Sunny and Shiwangi</span></section><section className="section venue"><div className="map"><MapPin /></div><div><span className="eyebrow">The venue</span><h2>Meet us<br /><em>there.</em></h2><p>{data.venue.name}</p><address>{data.venue.address}</address><a className="button" href={data.venue.mapsUrl} target="_blank" rel="noreferrer">Get directions <ExternalLink size={15} /></a></div></section><section className="section rsvp" id="rsvp"><div><span className="eyebrow">Kindly reply</span><h2>Will you join<br /><em>our celebration?</em></h2><p>Let us know if we can count you in. Your presence would mean the world to us.</p></div>{sent ? <div className="success"><Check /><h3>Thank you, {name || 'dear friend'}.</h3><p>Your RSVP has been noted.</p></div> : <form onSubmit={(e) => { e.preventDefault(); setSent(true) }}><label>Your name<input required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya Sharma" /></label><label>Guests<select><option>1</option><option>2</option><option>3</option><option>4</option></select></label><label>Response<select><option>Joyfully attending</option><option>Unable to attend</option></select></label><label>Message <span>(optional)</span><textarea placeholder="A note for the couple" /></label><button className="button" type="submit">Send RSVP <Send size={15} /></button></form>}</section>{canShareInvitation && <Share onInvitationSent={handleInvitationSent} />}</main>{loginOpen && !canShareInvitation && <div className="auth-modal"><div className="auth-card"><span className="eyebrow">Private access</span><h3>Invitation management</h3><p>Only admin and co-admin can access the share invitation tools.</p><label>Username<input value={login.username} onChange={(event) => setLogin({ ...login, username: event.target.value })} placeholder="admin or coadmin" /></label><label>Password<input type="password" value={login.password} onChange={(event) => setLogin({ ...login, password: event.target.value })} placeholder="Enter password" /></label>{loginError && <small className="auth-error">{loginError}</small>}<div className="auth-actions"><button type="button" className="button muted" onClick={() => { setLoginOpen(false); setLoginError(''); setLogin({ username: '', password: '' }); }}>Cancel</button><button type="button" className="button" onClick={handleLogin}>Login</button></div></div></div>}<footer><a className="logo" href="#top">S<span>&</span>S</a><p>Made with love for our favourite people.</p></footer></div> }
+  const handleGuestUpdate = (field, value) => {
+    setGuestForm((current) => ({ ...current, [field]: value }))
+    if (submitError) setSubmitError('')
+  }
+
+  const handleRsvpSubmit = async (event) => {
+    event.preventDefault()
+
+    if (!sheetEndpoint) {
+      setSubmitError('Google Sheet is not configured yet. Add your Apps Script URL to VITE_GOOGLE_SHEET_WEB_APP_URL and redeploy.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitError('')
+
+    try {
+      const response = await fetch(sheetEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...guestForm,
+          timestamp: new Date().toISOString(),
+        }),
+      })
+
+      const payload = await response.json().catch(() => ({}))
+
+      if (!response.ok || payload.status !== 'success') {
+        throw new Error(payload.message || 'Unable to save RSVP. Please try again.')
+      }
+
+      setName(guestForm.name)
+      setGuestForm({ name: '', guests: '1', response: 'Joyfully attending', message: '' })
+      setSent(true)
+    } catch (error) {
+      setSubmitError(error.message || 'Something went wrong while sending the RSVP.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return <div id="top"><Header canShareInvitation={canShareInvitation} /><main><audio ref={audioRef} src={data.musicUrl} loop preload="auto" /><section className="hero"><div className="hero-copy"><span className="eyebrow">{data.invitationLabel}</span><h1>Sunny <i>&</i><br />Shiwangi</h1><p>{data.description}</p><a href="#events">Explore the invitation <ArrowDown size={16} /></a></div><div className="hero-photo"><img src={data.heroImage.src} alt={data.heroImage.alt} /><span>with love<br /><b>2026</b></span></div></section><section className="section couple"><div className="couple-photo"><img src={data.gallery[2].src} alt="Bride in traditional attire" /><strong>Sunny <i>&</i> Shiwangi</strong></div><div><span className="eyebrow">The couple</span><h2>Made for<br /><em>each other.</em></h2><p>{data.intro}</p><div className="signature">S <span>&</span> S</div></div></section><Countdown /><Events /><section className="section story" id="story"><Heading eyebrow="Our story" title="And so it begins" text="The sweetest chapters are the ones we write together." /><div>{data.story.map((item, i) => <article key={item.title}><b>0{i + 1}</b><div><span className="eyebrow">{item.year}</span><h3>{item.title}</h3><p>{item.text}</p></div></article>)}</div></section><Gallery /><section className="family"><Heart size={20} fill="currentColor" /><p>{data.familyMessage}</p><span className="eyebrow light">With love, Sunny and Shiwangi</span></section><section className="section venue"><div className="map"><MapPin /></div><div><span className="eyebrow">The venue</span><h2>Meet us<br /><em>there.</em></h2><p>{data.venue.name}</p><address>{data.venue.address}</address><a className="button" href={data.venue.mapsUrl} target="_blank" rel="noreferrer">Get directions <ExternalLink size={15} /></a></div></section><section className="section rsvp" id="rsvp"><div><span className="eyebrow">Kindly reply</span><h2>Will you join<br /><em>our celebration?</em></h2><p>Let us know if we can count you in. Your presence would mean the world to us.</p></div>{sent ? <div className="success"><Check /><h3>Thank you, {name || 'dear friend'}.</h3><p>Your RSVP has been noted.</p></div> : <form onSubmit={handleRsvpSubmit}><label>Your name<input required value={guestForm.name} onChange={(event) => handleGuestUpdate('name', event.target.value)} placeholder="e.g. Priya Sharma" /></label><label>Guests<select value={guestForm.guests} onChange={(event) => handleGuestUpdate('guests', event.target.value)}><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label><label>Response<select value={guestForm.response} onChange={(event) => handleGuestUpdate('response', event.target.value)}><option>Joyfully attending</option><option>Unable to attend</option></select></label><label>Message <span>(optional)</span><textarea value={guestForm.message} onChange={(event) => handleGuestUpdate('message', event.target.value)} placeholder="A note for the couple" /></label>{submitError && <span className="submit-error">{submitError}</span>}<button className="button" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Sending...' : 'Send RSVP'} <Send size={15} /></button></form>}</section>{canShareInvitation && <Share onInvitationSent={handleInvitationSent} />}</main>{loginOpen && !canShareInvitation && <div className="auth-modal"><div className="auth-card"><span className="eyebrow">Private access</span><h3>Invitation management</h3><p>Only admin and co-admin can access the share invitation tools.</p><label>Username<input value={login.username} onChange={(event) => setLogin({ ...login, username: event.target.value })} placeholder="admin or coadmin" /></label><label>Password<input type="password" value={login.password} onChange={(event) => setLogin({ ...login, password: event.target.value })} placeholder="Enter password" /></label>{loginError && <small className="auth-error">{loginError}</small>}<div className="auth-actions"><button type="button" className="button muted" onClick={() => { setLoginOpen(false); setLoginError(''); setLogin({ username: '', password: '' }); }}>Cancel</button><button type="button" className="button" onClick={handleLogin}>Login</button></div></div></div>}<footer><a className="logo" href="#top">S<span>&</span>S</a><p>Made with love for our favourite people.</p></footer></div> }
 export default App
