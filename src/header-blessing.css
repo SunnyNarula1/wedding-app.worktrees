@@ -1,0 +1,30 @@
+.header-blessing {
+  position: absolute;
+  top: 35px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+
+.header-blessing span {
+  margin-top: 3px;
+  color: #e7e4e5;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .header-blessing { top: 6px; }
+  .header-blessing img { width: 122px; }
+  .header-blessing-shard.left { width: 13px; }
+  .header-blessing-shard.right { width: 17px; }  .header-blessing span { font-size: 12px; }
+}
