@@ -1,0 +1,21 @@
+#events.section {
+  max-width: 1440px;
+}
+
+#events .event-card {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+}
+
+#events .event-content {
+  max-width: none;
+}
+
+@media (max-width: 760px) {
+  #events .event-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #events .event-image {
+    height: 260px;
+  }
+}

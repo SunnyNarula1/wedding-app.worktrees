@@ -1,0 +1,52 @@
+.gallery {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gallery button {
+  min-width: 0;
+}
+
+.gallery img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 760px) {
+  .gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 10px;
+  }
+
+  .gallery button {
+    aspect-ratio: 1 / 1;
+  }
+
+  .gallery .large {
+    grid-column: span 2;
+    aspect-ratio: 16 / 10;
+  }
+
+  .gallery .tall {
+    grid-row: span 1;
+  }
+
+  .gallery button span {
+    left: 10px;
+    bottom: 10px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 380px) {
+  .gallery {
+    gap: 8px;
+  }
+
+  .gallery button span {
+    left: 8px;
+    bottom: 8px;
+    font-size: 8px;
+  }
+}
