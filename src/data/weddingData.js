@@ -5,7 +5,7 @@ export const weddingData = {
   description: 'Together with our families, we invite you to celebrate our special day.',
   intro: 'Two hearts, one beautiful beginning. We are getting married and would love to have you beside us as our story turns a new page.',
   familyMessage: 'With the blessings of our parents and families, we request your gracious presence and blessings as we begin this beautiful journey together.',
-  weddingDate: '2026-12-11T21:00:00+05:30',
+  weddingDate: '2026-12-05T21:00:00+05:30',
   venue: { name: 'Nagda', address: 'Nagda, Madhya Pradesh, India', mapsUrl: 'https://share.google/ho9HqSEvBKa6L5H2V' },
   musicUrl: '/gallery/Sun.mp3',
   heroImage: { src: '/gallery/both.JPG', alt: 'Sunny Narula and Shiwangi Khanduja together' },
